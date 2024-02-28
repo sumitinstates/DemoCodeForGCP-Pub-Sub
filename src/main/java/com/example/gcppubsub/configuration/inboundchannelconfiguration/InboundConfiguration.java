@@ -3,12 +3,14 @@ package com.example.gcppubsub.configuration.inboundchannelconfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
+import com.example.gcppubsub.kafka.configuration.FeedPublisherToKafka;
 import com.example.gcppubsub.outboundchannel.BrickItemUpdateFeedChannel;
 import com.example.gcppubsub.outboundchannel.NewItemFeedChannel;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
@@ -35,6 +37,11 @@ public class InboundConfiguration {
 	
 	@Autowired
 	BrickItemUpdateFeedChannel brickItemUpdateFeedChannelMessagingGateway;
+	
+	@Autowired
+	FeedPublisherToKafka feedPublisherToKafka;
+    
+
 
 	/*
 	 * An inbound channel adapter listens to messages from a Google Cloud Pub/Sub
@@ -98,6 +105,7 @@ public class InboundConfiguration {
 			
 			//messagingGateway.publish(new String((byte[]) message.getPayload())+ "-updated");
 
+			feedPublisherToKafka.publishMessageForNewItems(new String((byte[]) message.getPayload()));
 			BasicAcknowledgeablePubsubMessage originalMessage = message.getHeaders()
 					.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
 			originalMessage.ack();
